@@ -5,7 +5,7 @@ early_stop:
 federate:
   mode: standalone
   client_num: 1
-  total_round_num: 500
+  total_round_num: 250
   save_to: "checkpoints/shp_rlhf_gemma_safe_<choice_ckpt>.ckpt"
   save_freq: 50
   share_local_model: True
@@ -27,9 +27,9 @@ llm:
     use: True
     args: [ { 'adapter_package': 'peft', 'adapter_method': 'lora', 'r': 8, 'lora_alpha': 16, 'lora_dropout': 0.05 } ]
   reward_coeff: 0.1
-  grad_accum_step: 16
+  grad_accum_step: 8
 dataloader:
-  batch_size: 2
+  batch_size: 4
 model:
   type: 'mlabonne/Gemmalpaca-2B@huggingface_llm'
   # load_from_local_pretrained_fs_config: 'reward_yaml/alpaca-7b.yaml'
