@@ -163,6 +163,17 @@ def shp_dataset(data_root, num_clients, tokenizer):
             new_list_train_dict.append(sample)
     list_train_dict = new_list_train_dict
 
+    # Print the samples of each domain for each clients
+    for client_id in range(num_clients + 1):
+        print(f'Client {client_id}:')
+        num_sample_by_domains = dict()
+        for sample in new_list_train_dict:
+            if sample['category'] == f'Client_{client_id}':
+                if sample['domain'] not in num_sample_by_domains:
+                    num_sample_by_domains[sample['domain']] = 0
+                num_sample_by_domains[sample['domain']] += 1
+        print(num_sample_by_domains)
+
     return list_train_dict, list_val_dict, list_test_dict
 
 
