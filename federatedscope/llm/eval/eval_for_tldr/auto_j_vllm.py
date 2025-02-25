@@ -107,6 +107,7 @@ def read_file(path='test_results.txt'):
         'response': '',
         'response_another': '',
         'score': '',
+        'selector_choice': '',
         'choice': 0
     }
     for line in f.readlines():
@@ -133,6 +134,9 @@ def read_file(path='test_results.txt'):
         elif 'Score' in line:
             tag = 'score'
 
+        elif 'Selector choice' in line:
+            tag = 'selector_choice'
+
         elif '=============' in line:
             # The end of the record, which should be
             # appended to the collection
@@ -151,6 +155,7 @@ def read_file(path='test_results.txt'):
                 'response': '',
                 'response_another': '',
                 'score': '',
+                'selector_choice': '',
                 'choice': 0
             }
 
@@ -283,8 +288,8 @@ if __name__ == "__main__":
                     print(f'>>>> I am running for {file_path}')
                     if (filename + '_autoj_eval_win.txt' not in files):
                         eval_win_rate(file_path)
-                    if (filename + '_autoj_eval.txt' not in files):
-                        evaluation(file_path)
+                    # if (filename + '_autoj_eval.txt' not in files):
+                    #     evaluation(file_path)
     else:
-        eval_win_rate(args.file)
         evaluation(args.file)
+        eval_win_rate(args.file)

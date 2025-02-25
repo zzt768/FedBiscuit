@@ -1,3 +1,4 @@
+import logging
 import torch
 import random
 from torch.utils.data import DataLoader
@@ -22,7 +23,11 @@ from federatedscope.llm.dataset.llm_dataset import DefaultToken, \
     LLMDataset
 # from federatedscope.llm.eval.eval_for_tldr.auto_j_vllm import evaluation
 
-logger = None
+import sys
+
+sys.setrecursionlimit(100000)
+
+logger = logging.getLogger(__name__)
 
 
 def get_input_data(list_data_dict, w=5):
@@ -195,8 +200,8 @@ def best_of_n(model, dataset, tokenizer, n=16):
                 'subreddit': sample['subreddit'],
                 'title': sample['title'],
                 'post': sample['post'],
-                'output_A': sample['output_B'],
-                'output_B': sample['output_A'],
+                'output_A': sample['output_A'],
+                'output_B': sample['output_B'],
                 'choice': sample['choice']
             })
 
@@ -222,7 +227,7 @@ def best_of_n(model, dataset, tokenizer, n=16):
             predicted_indices += predicted.tolist()
 
         predicted_indices = np.array(predicted_indices)
-        last_better_idx[predicted_indices == 0] = i
+        last_better_idx[predicted_indices == 1] = i
 
     # print the final results
     return last_better_idx
@@ -251,7 +256,7 @@ def best_of_n_by_reward(model, dataset, tokenizer, n=16):
                               prompt_no_input=prompt,
                               output_tag='summary')
     dataloader = DataLoader(dataset=test_dataset,
-                            batch_size=n,
+                            batch_size=25,
                             shuffle=False,
                             collate_fn=LLMDataCollator(tokenizer=tokenizer))
 
@@ -321,8 +326,8 @@ def best_of_n_multilora(model, dataset, tokenizer, n=16):
                 'subreddit': sample['subreddit'],
                 'title': sample['title'],
                 'post': sample['post'],
-                'output_A': sample['output_B'],
-                'output_B': sample['output_A'],
+                'output_A': sample['output_A'],
+                'output_B': sample['output_B'],
                 'choice': sample['choice']
             })
 
@@ -361,7 +366,7 @@ def best_of_n_multilora(model, dataset, tokenizer, n=16):
             ]
 
         predicted_indices = np.array(predicted_indices)
-        last_better_idx[predicted_indices == 0] = i
+        last_better_idx[predicted_indices == 1] = i
 
     # print the final results
     return last_better_idx
@@ -435,6 +440,7 @@ def main():
                                 gen_cfg,
                                 n=16,
                                 load_eval_version=True)
+    dataset = dataset[:3000]
     # eval for the best_of_n dataset (vllm should be launched)
     # best_of_n_dataset_eval(init_cfg, gen_cfg, n=16)
 

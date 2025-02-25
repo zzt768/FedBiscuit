@@ -112,6 +112,7 @@ def main():
     data_root = os.path.join(init_cfg.data.root, 'reddit-tldr-comparison')
     _, _, test_dataset = load_comparison_dataset_by_choice(data_root=data_root,
                                                            tokenizer=tokenizer)
+    test_dataset.input_ids = test_dataset.input_ids[:20000]
 
     # list all choices
     choices = []
@@ -122,7 +123,7 @@ def main():
     results_display = open(os.path.join(init_cfg.outdir, 'test_results.txt'),
                            'w')
     dataloader = DataLoader(dataset=test_dataset,
-                            batch_size=25,
+                            batch_size=15,
                             shuffle=False,
                             collate_fn=LLMDataCollator(tokenizer=tokenizer))
 
