@@ -39,8 +39,6 @@ def cal_acc(logits, labels, choices):
     for idx, choice in enumerate(choices):
         new_labels[shift_labels == choice] = idx
 
-    # TODO: fix a bug if the new_labels do not contain the choice
-
     new_labels = new_labels.view(-1)
     new_logits = shift_logits[..., choices].view(-1, len(choices))
     new_logits = new_logits[(new_labels != DefaultToken.IGNORE_INDEX.value), :]
@@ -94,7 +92,7 @@ def get_rlhf_prompts_dataset(config):
     return (data_root, list_train_prompts, generation_prompt, selector_prompt)
 
 
-def get_input_data(list_data_dict, w=1):
+def get_input_data(list_data_dict, w=10):
     for left in tqdm(range(0, len(list_data_dict), w)):
         yield list_data_dict[left:left + w]
 
@@ -164,7 +162,7 @@ class RLHF_finetuning:
 
         return list_pairwise_data
 
-    def load_selector_preference_data(self, saveto):
+    def load_selector_preference_data(self, saveto, early_exiting=False):
         # This file save selector's choices
         fp = os.path.join(self.data_root, f"generated_choose_{saveto}.json")
 
@@ -187,13 +185,18 @@ class RLHF_finetuning:
             json.dump(list_preference_data, open(fp, "w"))
             logger.info(f"Save the selection results to file {fp}")
 
+            if early_exiting:
+                # For choosing the answer
+                exit(0)
+
         return list_preference_data
 
-    def train(self, saveto=None):
+    def train(self, saveto=None, early_exiting=False):
         if saveto is None:
             _, saveto = os.path.split(self.config.federate.save_to)
         # The training data should be selector's preference data
-        list_train_dict = self.load_selector_preference_data(saveto)
+        list_train_dict = self.load_selector_preference_data(
+            saveto, early_exiting)
 
         # move selector model to cpu
         self.selector_model.cpu()
@@ -299,7 +302,8 @@ class RLHF_finetuning:
     @torch.no_grad()
     def _choose_better_response(self, list_data_dict, model, tokenizer,
                                 prompt):
-        choices = [tokenizer(f"{c}")["input_ids"][-1] for c in ["A", "B"]]
+        choices = [tokenizer(f": {c}")["input_ids"][-1] for c in ["A", "B"]]
+        logger.info(f'Choice indices: {choices}')
 
         for sample in list_data_dict:
             sample["fake_choice"] = random.choice([" A", " B"])
@@ -313,7 +317,7 @@ class RLHF_finetuning:
         )
         dataloader = DataLoader(
             dataset=token_dataset,
-            batch_size=1,
+            batch_size=10,
             shuffle=False,
             collate_fn=LLMDataCollator(tokenizer=tokenizer),
         )

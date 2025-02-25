@@ -34,6 +34,10 @@ if __name__ == '__main__':
                         required=False,
                         default=None,
                         type=str)
+    parser.add_argument('--early-exiting',
+                        dest='early_exiting',
+                        help="DPO training data generation only",
+                        action="store_true")
     selector_args, extra = parser.parse_known_args()
 
     # Load the LLM config (init_cfg)
@@ -81,10 +85,11 @@ if __name__ == '__main__':
     gpu_manager = GPUManager(gpu_available=init_cfg.use_gpu,
                              specified_device=init_cfg.device)
     _server_device = gpu_manager.auto_choice()
-    RLHF_finetuning(model,
-                    tokenizer,
-                    init_cfg,
-                    selector_model,
-                    selector_tokenizer,
-                    generator_tokenizer,
-                    device=_server_device).train()
+    RLHF_finetuning(
+        model,
+        tokenizer,
+        init_cfg,
+        selector_model,
+        selector_tokenizer,
+        generator_tokenizer,
+        device=_server_device).train(early_exiting=selector_args.early_exiting)
