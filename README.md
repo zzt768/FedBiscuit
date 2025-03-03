@@ -1,310 +1,354 @@
-<h1 align="center">
-    <img src="https://img.alicdn.com/imgextra/i4/O1CN01yp6zdb23HOJJkCmZg_!!6000000007230-2-tps-2048-1009.png" width="400" alt="federatedscope-logo">
-</h1>
+# FedBis/FedBiscuit  
+_Towards Federated RLHF with Aggregated Client Preference for LLMs_
 
-![](https://img.shields.io/badge/language-python-blue.svg)
-![](https://img.shields.io/badge/license-Apache-000000.svg)
+![Language: Python](https://img.shields.io/badge/language-python-blue.svg)
+![License: Apache](https://img.shields.io/badge/license-Apache-000000.svg)
 [![Website](https://img.shields.io/badge/website-FederatedScope-0000FF)](https://federatedscope.io/)
-[![Playground](https://shields.io/badge/JupyterLab-Enjoy%20Your%20FL%20Journey!-F37626?logo=jupyter)](https://try.federatedscope.io/)
+[![JupyterLab Playground](https://shields.io/badge/JupyterLab-Enjoy%20Your%20FL%20Journey!-F37626?logo=jupyter)](https://try.federatedscope.io/)
 [![Contributing](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://federatedscope.io/docs/contributor/)
 
-FederatedScope is a comprehensive federated learning platform that provides convenient usage and flexible customization for various federated learning tasks in both academia and industry.  Based on an event-driven architecture, FederatedScope integrates rich collections of functionalities to satisfy the burgeoning demands from federated learning, and aims to build up an easy-to-use platform for promoting learning safely and effectively.
+![FedBis/FedBiscuit](fedbiscuit.png)
 
-A detailed tutorial is provided on our website: [federatedscope.io](https://federatedscope.io/)
+FedBis/FedBiscuit is a federated learning framework that enables reinforcement learning with human feedback (RLHF) for large language models (LLMs) without compromising user privacy. This codebase—forked from [FederatedScope](https://github.com/alibaba/FederatedScope) and [FedBiOT](https://github.com/HarliWu/FedBiOT)—supports bfloat16 precision and MultiGPU training.
 
-You can try FederatedScope via [FederatedScope Playground](https://try.federatedscope.io/) or [Google Colab](https://colab.research.google.com/github/alibaba/FederatedScope).
+---
 
-| [Code Structure](#code-structure) | [Quick Start](#quick-start) | [Advanced](#advanced) | [Documentation](#documentation) | [Publications](#publications) | [Contributing](#contributing) | 
+## Overview
 
-## News
-- ![new](https://img.alicdn.com/imgextra/i4/O1CN01kUiDtl1HVxN6G56vN_!!6000000000764-2-tps-43-19.png) [05-17-2023] Our paper [FS-REAL](https://arxiv.org/abs/2303.13363) has been accepted by KDD'2023!
-- ![new](https://img.alicdn.com/imgextra/i4/O1CN01kUiDtl1HVxN6G56vN_!!6000000000764-2-tps-43-19.png) [05-17-2023] Our benchmark paper for FL backdoor attacks [Backdoor Attacks Bench](https://arxiv.org/abs/2302.01677) has been accepted by KDD'2023!
-- ![new](https://img.alicdn.com/imgextra/i4/O1CN01kUiDtl1HVxN6G56vN_!!6000000000764-2-tps-43-19.png) [05-17-2023] Our paper [Communication Efficient and Differentially Private Logistic Regression under the Distributed Setting]() has been accepted by KDD'2023!
-- ![new](https://img.alicdn.com/imgextra/i4/O1CN01kUiDtl1HVxN6G56vN_!!6000000000764-2-tps-43-19.png) [04-25-2023] Our paper [pFedGate](https://arxiv.org/abs/2305.02776) has been accepted by ICML'2023!
-- ![new](https://img.alicdn.com/imgextra/i4/O1CN01kUiDtl1HVxN6G56vN_!!6000000000764-2-tps-43-19.png) [04-25-2023] Our benchmark paper for FedHPO [FedHPO-Bench](https://arxiv.org/abs/2206.03966) has been accepted by ICML'2023!
-- ![new](https://img.alicdn.com/imgextra/i4/O1CN01kUiDtl1HVxN6G56vN_!!6000000000764-2-tps-43-19.png) [04-03-2023] We release FederatedScope v0.3.0!
-- [02-10-2022] Our [paper](https://arxiv.org/pdf/2204.05011.pdf) elaborating on FederatedScope is accepted by VLDB'23!
-- [10-05-2022] Our benchmark paper for personalized FL, [pFL-Bench](https://arxiv.org/abs/2206.03655) has been accepted by NeurIPS'22, Dataset and Benchmark Track!
-- [08-18-2022] Our KDD 2022 [paper](https://arxiv.org/abs/2204.05562) on federated graph learning receives the KDD Best Paper Award for ADS track!
-- [07-30-2022] We release FederatedScope v0.2.0! 
-- [06-17-2022] We release **pFL-Bench**, a comprehensive benchmark for personalized Federated Learning (pFL), containing 10+ datasets and 20+ baselines. [[code](https://github.com/alibaba/FederatedScope/tree/master/benchmark/pFL-Bench), [pdf](https://arxiv.org/abs/2206.03655)]
-- [06-17-2022] We release **FedHPO-Bench**, a benchmark suite for studying federated hyperparameter optimization. [[code](https://github.com/alibaba/FederatedScope/tree/master/benchmark/FedHPOBench), [pdf](https://arxiv.org/abs/2206.03966)]
-- [06-17-2022] We release **B-FHTL**, a benchmark suit for studying federated hetero-task learning. [[code](https://github.com/alibaba/FederatedScope/tree/master/benchmark/B-FHTL), [pdf](https://arxiv.org/abs/2206.03436)]
-- [06-13-2022] Our project was receiving an attack, which has been resolved. [More details](https://github.com/alibaba/FederatedScope/blob/master/doc/news/06-13-2022_Declaration_of_Emergency.txt).
-- [05-25-2022] Our paper [FederatedScope-GNN](https://arxiv.org/abs/2204.05562) has been accepted by KDD'2022!
-- [05-06-2022] We release FederatedScope v0.1.0! 
+**Key Features:**
+- **Federated Preference Collection:** Each client trains a lightweight binary selector on local data. The server aggregates these selectors to simulate a large-scale preference dataset.
+- **Two Training Phases:**  
+  1. **Federated Preference Selector Training (FedBis):** Learn common user preferences via federated learning.
+  2. **LLM Fine-tuning with RLHF:** Use the aggregated binary selector(s) to fine-tune a pre-trained LLM through reinforcement learning.
 
-## Code Structure
+**Why FedBis/FedBiscuit?**
+- **Privacy-Preserving:** Users do not need to share their raw preference data.
+- **Computational Efficiency:** The binary selector avoids heavy computations compared with traditional reward model training.
+- **Enhanced Alignment:** The aggregated selector improves the LLM’s content professionalism and readability.
+- **FedBiscuit Extension:** To tackle preference heterogeneity and reward hacking, FedBiscuit clusters clients and trains multiple selectors for robust performance.
+
+---
+
+## Installation
+
+Before you run the code, set up your environment and install FS-LLM (which is integrated into this repository). Follow these steps:
+
+1. **Create a Conda Environment:**
+   ```bash
+   conda create -n fs-llm python=3.9
+   conda activate fs-llm
+   ```
+
+2. **Install PyTorch (>=1.13.0):**
+   ```bash
+   conda install pytorch==2.0.0 torchvision==0.15.0 torchaudio==2.0.0 pytorch-cuda=11.7 -c pytorch -c nvidia
+   ```
+
+3. **Install FS-LLM in Editable Mode:**
+   ```bash
+   pip install -e .[llm]
+   ```
+
+You are now ready to use FS-LLM.
+
+---
+
+## Training
+
+The training process is divided into two phases:
+
+### Phase 1: Federated Preference Selector Training
+
+1. **Prepare the Configuration File:**  
+   Create a YAML file (e.g., `fedbiscuit_script/tldr/tldr_choice_gemma_fedbiscuit_u3.yaml`) with the settings for your task. An example configuration is shown below:
+
+    ```yaml
+    # Whether to use GPU
+    use_gpu: True
+
+    # Deciding which GPU to use
+    device: 0
+
+    # Early stop steps, set `0` to disable
+    early_stop:
+      patience: 0
+
+    # Federate learning setting for TLDR task
+    federate:
+      mode: standalone
+      client_num: 53
+      # Number of clients sampled per round
+      sample_client_num: 5
+      # Number of communication round
+      total_round_num: 500
+      # Saving path for checkpoinnt
+      save_to: "checkpoints/tldr_choice_gemma_fedbiscuit_u3.ckpt"
+      ignore_weight: True
+      save_freq: 50
+      share_local_model: True
+      online_aggr: False
+
+    # Dataset for TLDR task (selector training phase)
+    data:
+      root: data/
+      type: 'reddit-tldr-comparison-choice@llm'
+      splits: [0.9,0.09,0.01]
+      splitter: 'meta'
+
+    # LLM related options
+    llm:
+      tok_len: 1024
+      # Gradient accumulation steps
+      grad_accum_step: 2
+      chat:
+        max_len: 1024
+      adapter:
+        use: True
+        args: [ { 'adapter_package': 'peft', 'adapter_method': 'lora', 'r': 8, 'lora_alpha': 16, 'lora_dropout': 0.05 } ]
+
+        # skip the following setting for FedBis
+        count: 3
+        warmup:
+          use: True
+          round: 50
+        grouping:
+          use: True
+          round: 50
+        
+    # DataLoader related options
+    dataloader:
+      # Batch size for iter loader (for a single update, the actual batch size is batch_size*grad_accum_step)
+      batch_size: 8
+
+    # Model related options
+    model:
+      # Model type (format: {MODEL_REPO}@huggingface_llm)
+      type: 'google/gemma-2b@huggingface_llm'
+
+    # Training related options for a binary selector
+    train:
+      # Number of local update steps
+      local_update_steps: 30
+      batch_or_epoch: batch
+      optimizer:
+        type: AdamW
+        betas: (0.9, 0.95)
+        lr: 0.00001
+      is_enable_half: True
+    criterion:
+      type: CrossEntropyLoss
+    trainer:
+      type: llmrewardchoicetrainer
+      choices: ['A', 'B']
+    eval:
+      freq: 50
+      metrics: ['loss', 'acc']
+      best_res_update_round_wise_key: test_loss
+      count_flops: False
+
+    # Specify the path to store the experimental results
+    expname: tldr/choice_gemma/fedbiscuit_u3
+    ```
+
+2. **Run the Training Script:**  
+   Execute the training with your configuration:
+   ```bash
+   CUDA_LAUNCH_BLOCKING=1 CUDA_VISIBLE_DEVICES=0 \
+   PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True python federatedscope/main.py --cfg fedbiscuit_script/tldr/tldr_choice_gemma_fedbiscuit_u3.yaml
+   ```
+
+   To enable multi-GPU training with Accelerate, run:
+   ```bash
+   CUDA_LAUNCH_BLOCKING=1 CUDA_VISIBLE_DEVICES=0,1 PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True \
+   accelerate launch --config_file fedbiscuit_script/accelerator_config_bf16.yaml federatedscope/main.py \
+   --cfg fedbiscuit_script/tldr/tldr_choice_gemma_fedbiscuit_u3.yaml llm.accelerator.use True
+   ```
+
+### Phase 2: LLM Fine-tuning with RLHF
+
+1. **Prepare the Fine-tuning YAML File:**  
+   Create a YAML file (e.g., `fedbiscuit_script/tldr/tldr_rlhf_fedbiscuit_gemma.yaml`) for RLHF fine-tuning. An example configuration is:
+
+    ```yaml
+    # Whether to use GPU
+    use_gpu: True
+
+    # Deciding which GPU to use
+    device: 0
+
+    # Early stop steps, set `0` to disable
+    early_stop:
+      patience: 0
+
+    # Federate learning related options
+    federate:
+      mode: standalone
+      client_num: 1
+      total_round_num: 150
+      # Replace <choice_ckpt> with a stored federated preference selector
+      save_to: "checkpoints/tldr_rlhf_gemma_<choice_ckpt>.ckpt"
+      save_freq: 50
+      share_local_model: True
+      online_aggr: False
+
+    # Dataset for TLDR task (RLHF phase)
+    data:
+      root: data/
+      type: 'reddit-tldr-rlhf@llm'
+      splits: [0.9,0.09,0.01]
+      splitter: 'iid'
+
+    # RLHF Fine-tuning related options 
+    llm:
+      rlhf: True
+      tok_len: 1024
+      max_new_token: 80
+      chat:
+        max_len: 1024
+      adapter:
+        use: True
+        args: [ { 'adapter_package': 'peft', 'adapter_method': 'lora', 'r': 8, 'lora_alpha': 16, 'lora_dropout': 0.05 } ]
+      # DPO beta value
+      reward_coeff: 0.1
+      # Gradient accumulation steps
+      grad_accum_step: 8
+
+    # DataLoader related options
+    dataloader:
+      # Batch size for iter loader (for a single update, the actual batch size is batch_size*grad_accum_step)
+      batch_size: 4
+
+    # Model related options
+    model:
+      # Model type (format: {MODEL_REPO}@huggingface_llm)
+      type: 'mlabonne/Gemmalpaca-2B@huggingface_llm'
+
+    # Training related options for a binary selector
+    train:
+      local_update_steps: 30
+      batch_or_epoch: batch
+      optimizer:
+        type: RMSprop
+        lr: 0.000001
+      is_enable_half: True
+    criterion:
+      type: CrossEntropyLoss
+    trainer:
+      type: llmrewardtrainer
+    eval:
+      freq: 50
+      metrics: ['loss', 'acc']
+      best_res_update_round_wise_key: val_loss
+      count_flops: False
+
+    # Specify the path to store the experimental results, replace <choice_ckpt> with a stored federated preference selector
+    expname: tldr/rlhf_gemma/<choice_ckpt>
+    ```
+
+2. **Run the RLHF Fine-tuning Script:**  
+   Use the selector configuration file from Phase 1 (e.g., `fedbiscuit_script/tldr/tldr_choice_gemma_fedbiscuit_u3.yaml`) as an argument:
+   ```bash
+   CUDA_LAUNCH_BLOCKING=1 CUDA_VISIBLE_DEVICES=0 \
+   PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True python federatedscope/llm/rlhf/main.py \
+   --selector-cfg-file fedbiscuit_script/tldr/tldr_choice_gemma_fedbiscuit_u3.yaml \
+   --cfg fedbiscuit_script/tldr/tldr_rlhf_fedbiscuit_gemma.yaml llm.accelerator.use True \
+   federate.save_to checkpoints/tldr_rlhf_gemma__tldr_choice_gemma_fedbiscuit_u3.ckpt \
+   expname tldr/rlhf_gemma/tldr_choice_gemma_fedbiscuit_u3
+   ```
+
+   For multi-GPU training, use:
+   ```bash
+   CUDA_LAUNCH_BLOCKING=1 CUDA_VISIBLE_DEVICES=0,1 PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True \
+   accelerate launch --config_file fedbiscuit_script/accelerator_config_bf16.yaml federatedscope/llm/rlhf/main.py \
+   --selector-cfg-file fedbiscuit_script/tldr/tldr_choice_gemma_fedbiscuit_u3.yaml \
+   --cfg fedbiscuit_script/tldr/tldr_rlhf_fedbiscuit_gemma.yaml llm.accelerator.use True \
+   federate.save_to checkpoints/tldr_rlhf_gemma__tldr_choice_gemma_fedbiscuit_u3.ckpt \
+   expname tldr/rlhf_gemma/tldr_choice_gemma_fedbiscuit_u3
+   ```
+
+---
+
+## Evaluation
+
+Evaluation procedures vary with the task. Here are the two main setups:
+
+### TLDR Summarization Task
+
+1. **Run Summarization Evaluation on Different Checkpoints:**  
+   Replace the checkpoint file name in the command accordingly.
+   ```bash
+   # Evaluation at 50 rounds:
+   CUDA_LAUNCH_BLOCKING=1 CUDA_VISIBLE_DEVICES=0 \
+   PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True python federatedscope/llm/eval/eval_for_tldr/eval_summarization.py \
+   --selector-cfg-file fedbiscuit_script/tldr/tldr_choice_gemma_fedbiscuit_u3.yaml \
+   --cfg fedbiscuit_script/tldr/tldr_rlhf_fedbiscuit_gemma.yaml llm.accelerator.use False \
+   federate.save_to checkpoints/50_tldr_rlhf_gemma__tldr_choice_gemma_fedbiscuit_u3.ckpt \
+   expname eval_tldr/rlhf_gemma/tldr_choice_gemma_fedbiscuit_u3 train.is_enable_half True
+   ```
+
+2. **Run Auto-J Evaluation:**  
+   To compare generated summaries with human annotations:
+   ```bash
+   CUDA_LAUNCH_BLOCKING=1 CUDA_VISIBLE_DEVICES=0 \
+   PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True python federatedscope/llm/eval/eval_for_tldr/auto_j_vllm.py \
+   --model-outputs-directory exp/tldr/rlhf_gemma/tldr_choice_gemma_fedbiscuit_u3/_summarization.txt --pairwise
+   ```
+
+### SHP (Question Answering) Task
+
+1. **Run QA Evaluation:**  
+   ```bash
+   CUDA_LAUNCH_BLOCKING=1 CUDA_VISIBLE_DEVICES=0 \
+   PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True python federatedscope/llm/eval/eval_for_AlpacaEval/eval_winrate.py \
+   --cfg fedbiscuit_script/shp/shp_rlhf_fedbiscuit_gemma.yaml federate.saveto {checkpoint_name} \
+   llm.accelerator.use False expname eval_shp/rlhf_gemma/{checkpoint_name}
+   ```
+   After this command, an `alpaca_eval.json` file will be generated. You can then use GPT-4-turbo to compare the outputs.
+
+---
+
+## Results
+
+The figures below are the results as reported in our paper:
+
+- **TLDR Summarization:**
+
+  ![TLDR](tldr_result.png)
+
+- **SHP QA:**
+
+  ![SHP](shp_result.png)
+
+---
+
+## Citation
+
+If you use FedBis/FedBiscuit in your research, please cite our work as follows:
+
 ```
-FederatedScope
-├── federatedscope
-│   ├── core           
-│   |   ├── workers              # Behaviors of participants (i.e., server and clients)
-│   |   ├── trainers             # Details of local training
-│   |   ├── aggregators          # Details of federated aggregation
-│   |   ├── configs              # Customizable configurations
-│   |   ├── monitors             # The monitor module for logging and demonstrating  
-│   |   ├── communication.py     # Implementation of communication among participants   
-│   |   ├── fed_runner.py        # The runner for building and running an FL course
-│   |   ├── ... ..
-│   ├── cv                       # Federated learning in CV        
-│   ├── nlp                      # Federated learning in NLP          
-│   ├── gfl                      # Graph federated learning          
-│   ├── autotune                 # Auto-tunning for federated learning         
-│   ├── vertical_fl              # Vartical federated learning         
-│   ├── contrib                          
-│   ├── main.py           
-│   ├── ... ...          
-├── scripts                      # Scripts for reproducing existing algorithms
-├── benchmark                    # We release several benchmarks for convenient and fair comparisons
-├── doc                          # For automatic documentation
-├── enviornment                  # Installation requirements and provided docker files
-├── materials                    # Materials of related topics (e.g., paper lists)
-│   ├── notebook                        
-│   ├── paper_list                                        
-│   ├── tutorial                                       
-│   ├── ... ...                                      
-├── tests                        # Unittest modules for continuous integration
-├── LICENSE
-└── setup.py
-```
+@inproceedings{wu2025towards,
+  title={Towards Federated RLHF with Aggregated Client Preference for LLMs},
+  author={Wu, Feijie and Liu, Xiaoze and Wang, Haoyu and Wang, Xingchen and Su, Lu and Gao, Jing},
+  booktitle={The Thirteenth International Conference on Learning Representations},
+  year={2025}
+}
 
-## Quick Start
+@inproceedings{wu2024fedbiot,
+  author = {Wu, Feijie and Li, Zitao and Li, Yaliang and Ding, Bolin and Gao, Jing},
+  title = {FedBiOT: LLM Local Fine-tuning in Federated Learning without Full Model},
+  year = {2024},
+  booktitle = {Proceedings of the 30th ACM SIGKDD Conference on Knowledge Discovery and Data Mining},
+  pages = {3345–3355}
+}
 
-We provide an end-to-end example for users to start running a standard FL course with FederatedScope.
+@inproceedings{kuang2024federatedscope,
+  author = {Kuang, Weirui and Qian, Bingchen and Li, Zitao and Chen, Daoyuan and Gao, Dawei and Pan, Xuchen and Xie, Yuexiang and Li, Yaliang and Ding, Bolin and Zhou, Jingren},
+  title = {FederatedScope-LLM: A Comprehensive Package for Fine-tuning Large Language Models in Federated Learning},
+  year = {2024},
+  booktitle = {Proceedings of the 30th ACM SIGKDD Conference on Knowledge Discovery and Data Mining},
+  pages = {5260–5271}
+}
 
-### Step 1. Installation
-
-First of all, users need to clone the source code and install the required packages (we suggest python version >= 3.9). You can choose between the following two installation methods (via docker or conda) to install FederatedScope.
-
-```bash
-git clone https://github.com/alibaba/FederatedScope.git
-cd FederatedScope
-```
-#### Use Docker
-
-You can build docker image and run with docker env (cuda 11 and torch 1.10):
-
-```
-docker build -f environment/docker_files/federatedscope-torch1.10.Dockerfile -t alibaba/federatedscope:base-env-torch1.10 .
-docker run --gpus device=all --rm -it --name "fedscope" -w $(pwd) alibaba/federatedscope:base-env-torch1.10 /bin/bash
-```
-If you need to run with down-stream tasks such as graph FL, change the requirement/docker file name into another one when executing the above commands:
-```
-# environment/requirements-torch1.10.txt -> 
-environment/requirements-torch1.10-application.txt
-
-# environment/docker_files/federatedscope-torch1.10.Dockerfile ->
-environment/docker_files/federatedscope-torch1.10-application.Dockerfile
-```
-Note: You can choose to use cuda 10 and torch 1.8 via changing `torch1.10` to `torch1.8`.
-The docker images are based on the nvidia-docker. Please pre-install the NVIDIA drivers and `nvidia-docker2` in the host machine. See more details [here](https://github.com/alibaba/FederatedScope/tree/master/environment/docker_files).
-
-#### Use Conda
-
-We recommend using a new virtual environment to install FederatedScope:
-
-```bash
-conda create -n fs python=3.9
-conda activate fs
-```
-
-If your backend is torch, please install torch in advance ([torch-get-started](https://pytorch.org/get-started/locally/)). For example, if your cuda version is 11.3 please execute the following command:
-
-```bash
-conda install -y pytorch=1.10.1 torchvision=0.11.2 torchaudio=0.10.1 torchtext=0.11.1 cudatoolkit=11.3 -c pytorch -c conda-forge
-```
-
-For users with Apple M1 chips:
-```bash
-conda install pytorch torchvision torchaudio -c pytorch
-# Downgrade torchvision to avoid segmentation fault
-python -m pip install torchvision==0.11.3
-```
-
-Finally, after the backend is installed, you can install FederatedScope from `source`:
-
-##### From source
-
-```bash
-# Editable mode
-pip install -e .
-
-# Or (developers for dev mode)
-pip install -e .[dev]
-pre-commit install
-```
-
-Now, you have successfully installed the minimal version of FederatedScope. (**Optinal**) For application version including graph, nlp and speech, run:
-
-```bash
-bash environment/extra_dependencies_torch1.10-application.sh
-```
-
-### Step 2. Prepare datasets
-
-To run an FL task, users should prepare a dataset. 
-The DataZoo provided in FederatedScope can help to automatically download and preprocess widely-used public datasets for various FL applications, including CV, NLP, graph learning, recommendation, etc. Users can directly specify `cfg.data.type = DATASET_NAME`in the configuration. For example, 
-
-```bash
-cfg.data.type = 'femnist'
-```
-
-To use customized datasets, you need to prepare the datasets following a certain format and register it. Please refer to [Customized Datasets](https://federatedscope.io/docs/own-case/#data) for more details.
-
-### Step 3. Prepare models
-
-Then, users should specify the model architecture that will be trained in the FL course.
-FederatedScope provides a ModelZoo that contains the implementation of widely adopted model architectures for various FL applications. Users can set up `cfg.model.type = MODEL_NAME` to apply a specific model architecture in FL tasks. For example,
-
-```yaml
-cfg.model.type = 'convnet2'
-```
-
-FederatedScope allows users to use customized models via registering. Please refer to [Customized Models](https://federatedscope.io/docs/own-case/#model) for more details about how to customize a model architecture.
-
-### Step 4. Start running an FL task
-
-Note that FederatedScope provides a unified interface for both standalone mode and distributed mode, and allows users to change via configuring. 
-
-#### Standalone mode
-
-The standalone mode in FederatedScope means to simulate multiple participants (servers and clients) in a single device, while participants' data are isolated from each other and their models might be shared via message passing. 
-
-Here we demonstrate how to run a standard FL task with FederatedScope, with setting `cfg.data.type = 'FEMNIST'`and `cfg.model.type = 'ConvNet2'` to run vanilla FedAvg for an image classification task. Users can customize training configurations, such as `cfg.federated.total_round_num`, `cfg.dataloader.batch_size`, and `cfg.train.optimizer.lr`, in the configuration (a .yaml file), and run a standard FL task as: 
-
-```bash
-# Run with default configurations
-python federatedscope/main.py --cfg scripts/example_configs/femnist.yaml
-# Or with custom configurations
-python federatedscope/main.py --cfg scripts/example_configs/femnist.yaml federate.total_round_num 50 dataloader.batch_size 128
-```
-
-Then you can observe some monitored metrics during the training process as:
-
-```
-INFO: Server has been set up ...
-INFO: Model meta-info: <class 'federatedscope.cv.model.cnn.ConvNet2'>.
-... ...
-INFO: Client has been set up ...
-INFO: Model meta-info: <class 'federatedscope.cv.model.cnn.ConvNet2'>.
-... ...
-INFO: {'Role': 'Client #5', 'Round': 0, 'Results_raw': {'train_loss': 207.6341676712036, 'train_acc': 0.02, 'train_total': 50, 'train_loss_regular': 0.0, 'train_avg_loss': 4.152683353424072}}
-INFO: {'Role': 'Client #1', 'Round': 0, 'Results_raw': {'train_loss': 209.0940284729004, 'train_acc': 0.02, 'train_total': 50, 'train_loss_regular': 0.0, 'train_avg_loss': 4.1818805694580075}}
-INFO: {'Role': 'Client #8', 'Round': 0, 'Results_raw': {'train_loss': 202.24929332733154, 'train_acc': 0.04, 'train_total': 50, 'train_loss_regular': 0.0, 'train_avg_loss': 4.0449858665466305}}
-INFO: {'Role': 'Client #6', 'Round': 0, 'Results_raw': {'train_loss': 209.43883895874023, 'train_acc': 0.06, 'train_total': 50, 'train_loss_regular': 0.0, 'train_avg_loss': 4.1887767791748045}}
-INFO: {'Role': 'Client #9', 'Round': 0, 'Results_raw': {'train_loss': 208.83140087127686, 'train_acc': 0.0, 'train_total': 50, 'train_loss_regular': 0.0, 'train_avg_loss': 4.1766280174255375}}
-INFO: ----------- Starting a new training round (Round #1) -------------
-... ...
-INFO: Server: Training is finished! Starting evaluation.
-INFO: Client #1: (Evaluation (test set) at Round #20) test_loss is 163.029045
-... ...
-INFO: Server: Final evaluation is finished! Starting merging results.
-... ...
-```
-
-#### Distributed mode
-
-The distributed mode in FederatedScope denotes running multiple procedures to build up an FL course, where each procedure plays as a participant (server or client) that instantiates its model and loads its data. The communication between participants is already provided by the communication module of FederatedScope.
-
-To run with distributed mode, you only need to:
-
-- Prepare isolated data file and set up `cfg.data.file_path = PATH/TO/DATA` for each participant;
-- Change `cfg.federate.model = 'distributed'`, and specify the role of each participant  by `cfg.distributed.role = 'server'/'client'`.
-- Set up a valid address by `cfg.distribute.server_host/client_host = x.x.x.x` and `cfg.distribute.server_port/client_port = xxxx`. (Note that for a server, you need to set up `server_host` and `server_port` for listening messages, while for a client, you need to set up `client_host` and `client_port` for listening as well as `server_host` and `server_port` for joining in an FL course)
-
-We prepare a synthetic example for running with distributed mode:
-
-```bash
-# For server
-python federatedscope/main.py --cfg scripts/distributed_scripts/distributed_configs/distributed_server.yaml data.file_path 'PATH/TO/DATA' distribute.server_host x.x.x.x distribute.server_port xxxx
-
-# For clients
-python federatedscope/main.py --cfg scripts/distributed_scripts/distributed_configs/distributed_client_1.yaml data.file_path 'PATH/TO/DATA' distribute.server_host x.x.x.x distribute.server_port xxxx distribute.client_host x.x.x.x distribute.client_port xxxx
-python federatedscope/main.py --cfg scripts/distributed_scripts/distributed_configs/distributed_client_2.yaml data.file_path 'PATH/TO/DATA' distribute.server_host x.x.x.x distribute.server_port xxxx distribute.client_host x.x.x.x distribute.client_port xxxx
-python federatedscope/main.py --cfg scripts/distributed_scripts/distributed_configs/distributed_client_3.yaml data.file_path 'PATH/TO/DATA' distribute.server_host x.x.x.x distribute.server_port xxxx distribute.client_host x.x.x.x distribute.client_port xxxx
-```
-
-An executable example with generated toy data can be run with (a script can be found in `scripts/run_distributed_lr.sh`):
-```bash
-# Generate the toy data
-python scripts/distributed_scripts/gen_data.py
-
-# Firstly start the server that is waiting for clients to join in
-python federatedscope/main.py --cfg scripts/distributed_scripts/distributed_configs/distributed_server.yaml data.file_path toy_data/server_data distribute.server_host 127.0.0.1 distribute.server_port 50051
-
-# Start the client #1 (with another process)
-python federatedscope/main.py --cfg scripts/distributed_scripts/distributed_configs/distributed_client_1.yaml data.file_path toy_data/client_1_data distribute.server_host 127.0.0.1 distribute.server_port 50051 distribute.client_host 127.0.0.1 distribute.client_port 50052
-# Start the client #2 (with another process)
-python federatedscope/main.py --cfg scripts/distributed_scripts/distributed_configs/distributed_client_2.yaml data.file_path toy_data/client_2_data distribute.server_host 127.0.0.1 distribute.server_port 50051 distribute.client_host 127.0.0.1 distribute.client_port 50053
-# Start the client #3 (with another process)
-python federatedscope/main.py --cfg scripts/distributed_scripts/distributed_configs/distributed_client_3.yaml data.file_path toy_data/client_3_data distribute.server_host 127.0.0.1 distribute.server_port 50051 distribute.client_host 127.0.0.1 distribute.client_port 50054
-```
-
-And you can observe the results as (the IP addresses are anonymized with 'x.x.x.x'):
-
-```
-INFO: Server: Listen to x.x.x.x:xxxx...
-INFO: Server has been set up ...
-Model meta-info: <class 'federatedscope.core.lr.LogisticRegression'>.
-... ...
-INFO: Client: Listen to x.x.x.x:xxxx...
-INFO: Client (address x.x.x.x:xxxx) has been set up ...
-Client (address x.x.x.x:xxxx) is assigned with #1.
-INFO: Model meta-info: <class 'federatedscope.core.lr.LogisticRegression'>.
-... ...
-{'Role': 'Client #2', 'Round': 0, 'Results_raw': {'train_avg_loss': 5.215108394622803, 'train_loss': 333.7669372558594, 'train_total': 64}}
-{'Role': 'Client #1', 'Round': 0, 'Results_raw': {'train_total': 64, 'train_loss': 290.9668884277344, 'train_avg_loss': 4.54635763168335}}
------------ Starting a new training round (Round #1) -------------
-... ...
-INFO: Server: Training is finished! Starting evaluation.
-INFO: Client #1: (Evaluation (test set) at Round #20) test_loss is 30.387419
-... ...
-INFO: Server: Final evaluation is finished! Starting merging results.
-... ...
-```
-
-
-## Advanced
-
-As a comprehensive FL platform, FederatedScope provides the fundamental implementation to support requirements of various FL applications and frontier studies, towards both convenient usage and flexible extension, including:
-
-- **Personalized Federated Learning**: Client-specific model architectures and training configurations are applied to handle the non-IID issues caused by the diverse data distributions and heterogeneous system resources.
-- **Federated Hyperparameter Optimization**: When hyperparameter optimization (HPO) comes to Federated Learning, each attempt is extremely costly due to multiple rounds of communication across participants. It is worth noting that HPO under the FL is unique and more techniques should be promoted such as low-fidelity HPO.
-- **Privacy Attacker**: The privacy attack algorithms are important and convenient to verify the privacy protection strength of the design FL systems and algorithms, which is growing along with Federated Learning.
-- **Graph Federated Learning**: Working on the ubiquitous graph data, Graph Federated Learning aims to exploit isolated sub-graph data to learn a global model, and has attracted increasing popularity.
-- **Recommendation**: As a number of laws and regulations go into effect all over the world, more and more people are aware of the importance of privacy protection, which urges the recommender system to learn from user data in a privacy-preserving manner.
-- **Differential Privacy**: Different from the encryption algorithms that require a large amount of computation resources,  differential privacy is an economical yet flexible technique to protect privacy, which has achieved great success in database and is ever-growing in federated learning.
-- ...
-
-More supports are coming soon! We have prepared a [tutorial](https://federatedscope.io/) to provide more details about how to utilize FederatedScope to enjoy your journey of Federated Learning! 
-
-Materials of related topics are constantly being updated, please refer to [FL-Recommendation](https://github.com/alibaba/FederatedScope/tree/master/materials/paper_list/FL-Recommendation), [Federated-HPO](https://github.com/alibaba/FederatedScope/tree/master/materials/paper_list/Federated_HPO), [Personalized FL](https://github.com/alibaba/FederatedScope/tree/master/materials/paper_list/Personalized_FL), [Federated Graph Learning](https://github.com/alibaba/FederatedScope/tree/master/materials/paper_list/Federated_Graph_Learning), [FL-NLP](https://github.com/alibaba/FederatedScope/tree/master/materials/paper_list/FL-NLP), [FL-Attacker](https://github.com/alibaba/FederatedScope/tree/master/materials/paper_list/FL-Attacker), [FL-Incentive-Mechanism](https://github.com/alibaba/FederatedScope/tree/master/materials/paper_list/FL-Incentive), [FL-Fairness](https://github.com/alibaba/FederatedScope/tree/master/materials/paper_list/FL-Fiarness) and so on. 
-
-## Documentation
-
-The classes and methods of FederatedScope have been well documented so that users can generate the API references by:
-
-```shell
-cd doc
-pip install -r requirements.txt
-make html
-```
-NOTE:
-* The `doc/requirements.txt` is only for documentation of API by Sphinx, which can be automatically generated by Github actions `.github/workflows/sphinx.yml`. (Trigger by pull request if `DOC` in the title.)
-* Download via Artifacts in Github actions.
-
-We put the API references on our [website](https://federatedscope.io/refs/index).
-
-Besides, we provide documents for [executable scripts](https://github.com/alibaba/FederatedScope/tree/master/scripts) and [customizable configurations](https://github.com/alibaba/FederatedScope/tree/master/federatedscope/core/configs).
-
-## License
-
-FederatedScope is released under Apache License 2.0.
-
-## Publications
-If you find FederatedScope useful for your research or development, please cite the following <a href="https://arxiv.org/abs/2204.05011" target="_blank">paper</a>:
-```
 @article{federatedscope,
   title = {FederatedScope: A Flexible Federated Learning Platform for Heterogeneity},
   author = {Xie, Yuexiang and Wang, Zhen and Gao, Dawei and Chen, Daoyuan and Yao, Liuyi and Kuang, Weirui and Li, Yaliang and Ding, Bolin and Zhou, Jingren},
@@ -315,25 +359,3 @@ If you find FederatedScope useful for your research or development, please cite 
   year={2023}
 }
 ```
-More publications can be found in the [Publications](https://federatedscope.io/pub/).
-
-## Contributing
-
-We **greatly appreciate** any contribution to FederatedScope! We provide a developer version of FederatedScope with additional pre-commit hooks to perform commit checks compared to the official version:
-
-```bash
-# Install the developer version
-pip install -e .[dev]
-pre-commit install
-
-# Or switch to the developer version from the official version
-pip install pre-commit
-pre-commit install
-pre-commit run --all-files
-```
-
-You can refer to [Contributing to FederatedScope](https://federatedscope.io/docs/contributor/) for more details.
-
-Welcome to join in our [Slack channel](https://join.slack.com/t/federatedscopeteam/shared_invite/zt-1apmfjqmc-hvpYbsWJdm7D93wPNXbqww), or DingDing group (please scan the following QR code) for discussion.
-
-<img width="150" src="https://img.alicdn.com/imgextra/i2/O1CN01NSWjlJ1q8bliVtjRp_!!6000000005451-0-tps-924-926.jpg" width="400" alt="federatedscope-logo">
