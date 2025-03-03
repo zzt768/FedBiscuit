@@ -1,5 +1,4 @@
-# FedBis/FedBiscuit  
-_Towards Federated RLHF with Aggregated Client Preference for LLMs_
+# FedBis/FedBiscuit: Towards Federated RLHF with Aggregated Client Preference for LLMs
 
 ![Language: Python](https://img.shields.io/badge/language-python-blue.svg)
 ![License: Apache](https://img.shields.io/badge/license-Apache-000000.svg)
